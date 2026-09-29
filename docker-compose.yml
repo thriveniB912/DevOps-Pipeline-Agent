@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_USER: ops, POSTGRES_PASSWORD: ops, POSTGRES_DB: opsmemory }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  # Real Hindsight memory server. Start with: docker compose --profile hindsight up -d
+  hindsight:
+    profiles: ["hindsight"]
+    image: ghcr.io/vectorize-io/hindsight:latest
+    ports: ["8888:8888", "9999:9999"]   # API, UI
+    environment:
+      HINDSIGHT_API_LLM_API_KEY: ${OPENAI_API_KEY}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_LLM_MODEL:-gpt-4o-mini}
+    volumes: [hsdata:/home/hindsight/.pg0]
+
+volumes: { pgdata: {}, hsdata: {} }
